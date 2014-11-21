@@ -1,0 +1,9 @@
+---
+- hosts: all
+  sudo: yes
+  remote_user: vagrant
+  vars:
+    username: newuser
+  tasks:
+    - name: ユーザを追加
+      user: name={{ username }} group=wheel shell=/bin/bash
