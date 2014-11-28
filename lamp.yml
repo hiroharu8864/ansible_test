@@ -1,0 +1,41 @@
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+  vars:
+    mysql_root_password: "password"
+  tasks:
+  - name: Stop iptables
+    service: name=iptables state=stopped
+  - name: Install wget ntp vim package
+    yum: name={{ item }} state=present
+    with_items:
+      - wget
+      - ntp
+      - vim
+  - name: SELinux Disable
+    command: setenforce 0
+    ignore_errors: True
+  - name: Edit SELinux config
+    command: sed -i -e "s/^SELINUX=enforing/SELINUX=disabled/g" /etc/selinux/config
+  - name: Install httpd package
+    yum: name=httpd state=latest
+  - name: httpd service start
+    service: name=httpd state=running enabled=yes
+  - name: Install php package
+    yum: name={{ item }} state=present
+    with_items:
+      - php
+      - php-cli
+      - php-curl
+      - php-pear
+      - php-mysql
+      - curl
+      - ImageMagick
+  - name: Install mysql-server package
+    yum: name=mysql-server state=installed
+  - name: mysqld service start
+    service: name=mysqld state=running enabled=yes
+  - name: Set mysql root password
+    command: mysqladmin -u root password '{{ mysql_root_password }}'
+    ignore_errors: True
